@@ -16,14 +16,23 @@ struct ContentView: View {
     @State private var showingScore = false
     // Variable to store the title to be shown in the alert
     @State private var scoreTitle = ""
+    // Variable to track the user's score
+    @State private var score = 0
+    // Variable to track the number of questions so far
+    @State private var numQuestions = 0
     
-    // When you click a flag this function will run, compare the number of the flag you selected to the correct answer, and then display an alert saying if you were correct or not
+    // When you click a flag this function will run, compare the number of the flag you selected to the correct answer, and then set the scoreTitle and trigger the showingScore alert (and increment the score if you were correct)
     func flagTapped(_ number: Int) {
-        if number == correctAnswer {
+        if numQuestions == 8 {
+            scoreTitle = "You've completed this round - would you like to restart?"
+        } else if number == correctAnswer {
             scoreTitle = "Correct!"
+            score += 1
         } else {
-            scoreTitle = "Wrong"
+            scoreTitle = "Wrong, that's the flag of \(countries[number])!"
         }
+        
+        numQuestions += 1
         
         showingScore = true
     }
@@ -32,6 +41,13 @@ struct ContentView: View {
     func askQuestion() {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+    }
+    
+    // This function sets our number of questions asked and score back to zero, then calls askQuestion to shuffle the countries and se
+    func restart() {
+        numQuestions = 0
+        score = 0
+        askQuestion()
     }
     
     var body: some View {
@@ -44,6 +60,7 @@ struct ContentView: View {
             .ignoresSafeArea()
             
             VStack {
+                // We use a few spacers here to separate our content nicely
                 Spacer()
                 // Adds a large bold white title
                 Text("Guess the Flag")
@@ -52,7 +69,7 @@ struct ContentView: View {
                 Spacer()
                 Spacer()
                 // Shows our score with an unbolded white title
-                Text("Score: ???")
+                Text("Score: \(score)/8")
                     .foregroundColor(.white)
                     .font(.title.bold())
                 
@@ -95,12 +112,23 @@ struct ContentView: View {
             }
             .padding()
         }
-        // This shows our alert when showingScore is true, which is set to true when a button is pressed
+        // This shows our alert when showingScore is true, which is set to true when a button is pressed - it shows our scoreTitle set by our flagTapped function
         .alert(scoreTitle, isPresented: $showingScore) {
-            // The alert will have a button that says continue, that will call askQuestion to re-shuffle our flags and the correct answer
-            Button("Continue", action: askQuestion)
+            // If it's the final question, the alert will have a button asking if you want to restart and will call the restart function
+            if numQuestions == 8 {
+                Button("Restart?", action: restart)
+            } else {
+                // If it's not the final question, the alert will have a button that says continue, which will call askQuestion to re-shuffle our flags and the correct answer
+                Button("Continue", action: askQuestion)
+            }
+            // The alert will also display your score
         } message: {
-            Text("Your score is ???")
+            // If it's the final question, we display a different message
+            if numQuestions == 8 {
+                Text("Your final score is \(score)/8")
+            } else {
+                Text("Your score is \(score)/8")
+            }
         }
     }
 }
