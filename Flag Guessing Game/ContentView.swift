@@ -7,6 +7,21 @@
 
 import SwiftUI
 
+// Custom FlagImage view to style our flags
+struct FlagImage: View {
+    var country = ""
+    
+    var body: some View {
+        Image(country)
+        // Rendering mode original makes it so the button will keep the original image rather than being styled like a button
+            .renderingMode(.original)
+        // ClipShape changes the shape of our flags to capsules
+            .clipShape(Capsule())
+        // Add a shadow to our flags
+            .shadow(radius: 5)
+    }
+}
+
 struct ContentView: View {
     // Randomly shuffled array of countries to guess
     @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"].shuffled()
@@ -93,14 +108,8 @@ struct ContentView: View {
                             // When you click the button, we call our flagTapped function to check if it was the correct answer and show an alert
                             flagTapped(number)
                         } label: {
-                            // Here we grab the image of the first three randomly shuffled countries in our array
-                            Image(countries[number])
-                            // Rendering mode original makes it so the button will keep the original image rather than being styled like a button
-                                .renderingMode(.original)
-                            // ClipShape changes the shape of our flags to capsules
-                                .clipShape(Capsule())
-                            // Add a shadow to our flags
-                                .shadow(radius: 5)
+                            // Here we grab the image of the first three randomly shuffled countries in our array, and use our FlagImage view to style the flags
+                            FlagImage(country: countries[number])
                         }
                     }
                 }
