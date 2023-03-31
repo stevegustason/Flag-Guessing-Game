@@ -77,7 +77,7 @@ struct ContentView: View {
             VStack {
                 // We use a few spacers here to separate our content nicely
                 Spacer()
-                // Adds a large bold white title
+                // Adds large bold white title
                 Text("Guess the Flag")
                         .font(.largeTitle.bold())
                         .foregroundColor(.white)
