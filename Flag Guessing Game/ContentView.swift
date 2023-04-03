@@ -35,6 +35,10 @@ struct ContentView: View {
     @State private var score = 0
     // Variable to track the number of questions so far
     @State private var numQuestions = 0
+    // Variable to track which flag was clicked
+    @State private var whichClicked = -1
+    // Variable to track animation amount
+    @State private var animationAmount = 0.0
     
     // When you click a flag this function will run, compare the number of the flag you selected to the correct answer, and then set the scoreTitle and trigger the showingScore alert (and increment the score if you were correct)
     func flagTapped(_ number: Int) {
@@ -49,13 +53,16 @@ struct ContentView: View {
         
         numQuestions += 1
         
+        whichClicked = number
+        
         showingScore = true
     }
     
-    // This function will re-shuffle our country array and select a new correct answer
+    // This function will re-shuffle our country array, select a new correct answer, and reset our variable tracking which flag was clicked
     func askQuestion() {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        whichClicked = -1
     }
     
     // This function sets our number of questions asked and score back to zero, then calls askQuestion to shuffle the countries and se
@@ -107,9 +114,19 @@ struct ContentView: View {
                         Button {
                             // When you click the button, we call our flagTapped function to check if it was the correct answer and show an alert
                             flagTapped(number)
+                            withAnimation(.default) {
+                                animationAmount = 360.0
+                            }
                         } label: {
                             // Here we grab the image of the first three randomly shuffled countries in our array, and use our FlagImage view to style the flags
                             FlagImage(country: countries[number])
+                            // Here, we have a 360 degree spin effect - we use a conditional to spin the flag you clicked 360 degrees, while leaving the other two stationary.
+                                .rotation3DEffect(.degrees(whichClicked == number ? 360 : 0), axis: (x: 0, y:1, z:0))
+                            // Here we make leave the correct answer full opacity and size, but change the incorrect flags to a smaller size and more transparency (only once our whichClicked variable has been set, otherwise the correct answer would be identifiable because the incorrect flags would always be small and transparent).
+                                .opacity(number == correctAnswer || whichClicked == -1 ? 1 : 0.25)
+                                .scaleEffect(number == correctAnswer || whichClicked == -1 ? 1 : 0.5)
+                            // Then we have our animation to animate the above modifieres, using whichClicked as our value to watch.
+                                .animation(.default, value: whichClicked)
                         }
                     }
                 }
